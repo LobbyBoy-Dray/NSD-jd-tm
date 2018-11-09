@@ -68,10 +68,17 @@ class JdspiderSpider(scrapy.Spider):
 		pattern = re.compile(r"searchCB\((.*)\)")
 		text = response.text
 		text = text.replace('\n','')
-		text = text.replace(' ', '')
-		text = text.replace("\\x2F",'')
-		data = pattern.match(text).group(1)
+		text = text.replace('\\','\\\\')
+		# 特殊字符替换
+		data = pattern.search(text).group(1)
 		data = json.loads(data)
+		# try:
+		# 	data = json.loads(data)
+		# except:
+		# 	print("json解析错误")
+		# 	with open("errorDATA.txt", "w", encoding = 'utf-8') as f:
+		# 		f.write(data)
+		# 	time.sleep(100)
 		wares = data["data"]["searchm"]["Paragraph"]
 		# 增加2页测试
 		if wares:
@@ -81,7 +88,7 @@ class JdspiderSpider(scrapy.Spider):
 				wId = ware["wareid"]
 				url = "https://item.jd.com/%s.html" % str(wId)
 				yield scrapy.Request(url, headers = self.headers_detail, callback = self.parseWareDetail, meta = {'wNum':wNum, 'wId':wId}, dont_filter = True)
-			print("【%s】第【%s】页" % (self.keyword, str(self.pageNum)))
+			print("【%s】第【%s】页, 共【%s】件商品" % (self.keyword, str(self.pageNum), str(len(wares))))
 			# 下一页
 			self.pageNum += 1
 			url = "https://so.m.jd.com/ware/search._m2wq_list?keyword=%s&datatype=1&page=%s&pagesize=%s" % (self.keyword, str(self.pageNum), str(self.pagesize))
@@ -168,8 +175,8 @@ class JdspiderSpider(scrapy.Spider):
 			skuItem["SPU_NUM"] = wNum
 			skuItem["SKU_ID"]  = i[0]
 			skuItem["SKU_TIT"] = i[1]
-			skuItem["SKU_PRICEBF"] = i[2]["op"]
-			skuItem["SKU_PRICEAF"] = i[2]["p"]
+			skuItem["SKU_PRICEBF"] = float(i[2]["op"])
+			skuItem["SKU_PRICEAF"] = float(i[2]["p"])
 			print("SKU: 商品【%s】" % str(wID))
 			yield skuItem
 
