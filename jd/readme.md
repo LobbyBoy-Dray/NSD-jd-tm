@@ -1,7 +1,8 @@
 # 一. 使用方法
 
-* Step 1：`cd`至`.\NSD-jd-tm\jd\jdWare`目录下；
-* Step 2：`scrapy crawl jdSpider`。
+* Step 1：打开`.\NSD-jd-tm\jd\jdWare\jdWare\spiders\jdSpider`，根据需求修改line 14的keyword，该项含义为“搜索关键字”；
+* Step 2：`cd`至`.\NSD-jd-tm\jd\jdWare`目录下；
+* Step 3：`scrapy crawl jdSpider`。
 
 # 二. 环境要求
 
@@ -48,5 +49,6 @@
 
 # 四. 其他
 
+* 每个关键字搜索结束，开始下一个关键字搜索后，商品的NUM又会从P1开始标注；
 * 每个关键字搜索，最多搜索到75*100，即7500个结果；
 * 评论部分，由于存在后期访问不稳定的原因，爬取到的评论并非全部评论，目前是按“多多益善”的原则，尽可能爬取多的评论。

@@ -8,8 +8,6 @@ from jdWare.items import SkuItem
 from jdWare.items import ReviewItem
 
 
-# 需:增加2页测试
-
 class JdspiderSpider(scrapy.Spider):
 	name = 'jdSpider'
 	allowed_domains = ['so.m.jd.com']
@@ -80,7 +78,6 @@ class JdspiderSpider(scrapy.Spider):
 		# 		f.write(data)
 		# 	time.sleep(100)
 		wares = data["data"]["searchm"]["Paragraph"]
-		# 增加2页测试
 		if wares:
 			for ware in wares:
 				self.wareCounter += 1
@@ -124,9 +121,15 @@ class JdspiderSpider(scrapy.Spider):
 		# SKU项目，不同版本
 		all_SPU_NUM = response.xpath(".//div[@id='choose-attrs']/div[1]/div[@class='dd']/div/@data-sku").extract()
 		all_SKU_TIT = response.xpath(".//div[@id='choose-attrs']/div[1]/div[@class='dd']/div/@data-value").extract()
-		temp = ','.join(all_SPU_NUM)
-		url = "https://pe.3.cn/prices/mgets?skuids=%s" % temp
-		yield scrapy.Request(url, headers = self.headers_price, callback = self.parsePrice, meta = {"wNum":wNum, "wID":wID, "all_SPU_NUM":all_SPU_NUM, "all_SKU_TIT":all_SKU_TIT}, dont_filter = True)
+		if all_SPU_NUM:
+			temp = ','.join(all_SPU_NUM)
+			url = "https://pe.3.cn/prices/mgets?skuids=%s" % temp
+			yield scrapy.Request(url, headers = self.headers_price, callback = self.parsePrice, meta = {"wNum":wNum, "wID":wID, "all_SPU_NUM":all_SPU_NUM, "all_SKU_TIT":all_SKU_TIT}, dont_filter = True)
+		else:
+			all_SPU_NUM = [wID,]
+			all_SKU_TIT = [wName,]
+			url = "https://pe.3.cn/prices/mgets?skuids=%s" % wID
+			yield scrapy.Request(url, headers = self.headers_price, callback = self.parsePrice, meta = {"wNum":wNum, "wID":wID, "all_SPU_NUM":all_SPU_NUM, "all_SKU_TIT":all_SKU_TIT}, dont_filter = True)
 		# Review项目，评论，page从0开始
 		reviewPageNum = 0
 		url = "https://sclub.jd.com/comment/productPageComments.action?productId=%s&score=0&sortType=6&page=%s&pageSize=10" % (wID, str(reviewPageNum))
